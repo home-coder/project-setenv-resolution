@@ -110,19 +110,13 @@ static void set_res_bootenv(char *fbdev, char *resval)
 				memcpy(key[VAL2], mid, strlen(mid));
 				mid[0] = '\0';
 				key[VAL1] = linebuf;
-
+				printf("%s%s%s", key[VAL1], key[VAL2], key[VAL3]);
 				if ( (keyval2_second = strstr(key[VAL2], fbdev)) != NULL ) {
 					keyval2_second[0] = '\0';
 					keyval2_first = key[VAL2];
-
-					int resval_size = strlen(resval);
-					keyval2_second = malloc(sizeof(char) * resval_size);
-					memset(keyval2_second, 0x0, resval_size);
-					memcpy(keyval2_second, resval, resval_size);
-					keyval2_second[strlen(resval)] = '\0';
+					keyval2_second = resval;
 					strcat(keyval2_first, keyval2_second);
 					sprintf(linebuf, "%s%s%s", key[VAL1], keyval2_first, key[VAL3]);
-					printf("%s\n", linebuf);
 					nsize = strlen(linebuf);
 					linebuf[nsize] = '\0';
 
@@ -131,12 +125,11 @@ static void set_res_bootenv(char *fbdev, char *resval)
 						fclose(fp);
 						exit(-1);
 					}
-					printf("%s\n", linebuf);
 					fprintf(fp, "%s", linebuf);
 					fclose(fp);
 
 					for (i = 0; i < VAL_MAX; i++) {
-						//free(key[i]);
+						free(key[i]);
 						key[i] = NULL;
 					}
 				}
