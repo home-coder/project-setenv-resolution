@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <getopt.h>
+#include <stdlib.h>
 
 #define BUFSIZE    16
 
@@ -18,7 +19,7 @@ resolution hdmifbres[] = {
 	{"1024x768",  "hdmi,1024x768M@60,bpp=32"},
 };
 
-static const char *short_options = "d:r:";
+static const char *short_options = "d:r:h";
 
 static const struct option long_options[] = {
 	{"fbdev", required_argument, NULL, 'd'},
@@ -39,14 +40,18 @@ int main(int argc, char **argv)
 {
 	char *fbdev, *fbres;
 
+	if (argc < 2) {
+		print_usage();
+		exit(-1);
+	}
 	int arg;
 	while ((arg = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
 		switch (arg) {
 			case 'd': fbdev = optarg; break;
 			case 'r': fbres = optarg; break;
-			case 'h': print_usage();  break;
+			case 'h': print_usage();  exit(0);
 			case '?':
-					  perror("invalid command argument\n");
+					  //fprintf(stderr, "invalid command argument\n");默认也也也打印出错信息
 					  return -1;
 		}
 	}
