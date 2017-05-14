@@ -85,7 +85,7 @@ static void set_res_bootenv(char *fbdev, char *resval)
 	char *mid, *end;
 	int i;
 	char *keyval2_first, *keyval2_second;
-	int lsize, nsize;
+	int lsize = 0, nsize;
 
 	if (!(fp = fopen(BOOTINI, "r+"))) {
 		fprintf(stderr, "open boot env error\n");
@@ -97,10 +97,11 @@ static void set_res_bootenv(char *fbdev, char *resval)
 	}
 
 	while (fgets(linebuf, LINE_SIZE, fp)) {
-		lsize += strlen(linebuf);
+		int curlen = strlen(linebuf);
+		lsize += curlen;
 
 		if (!strncmp(linebuf, "bootargs", 8)) {
-			lsize -= strlen(linebuf);
+			lsize -= curlen;
 
 			if ((mid = strstr(linebuf, fbdev)) != NULL) {
 				if ((end = strstr(mid, " ")) != NULL) {
@@ -118,7 +119,13 @@ static void set_res_bootenv(char *fbdev, char *resval)
 					strcat(keyval2_first, keyval2_second);
 					sprintf(linebuf, "%s%s%s", key[VAL1], keyval2_first, key[VAL3]);
 					nsize = strlen(linebuf);
-					linebuf[nsize] = '\0';
+
+					//FIXME delet 缓冲区中剩余的字符
+					if (nsize < curlen) {
+						memset(linebuf+nsize-1, 0x0, curlen-nsize);
+					} else {
+						//do nothing
+					}
 
 					if (fseek(fp, lsize, SEEK_SET) < 0) {
 						fprintf(stderr, "lseek boot env file error\n");
@@ -129,7 +136,7 @@ static void set_res_bootenv(char *fbdev, char *resval)
 					fclose(fp);
 
 					for (i = 0; i < VAL_MAX; i++) {
-						free(key[i]);
+					//	free(key[i]);
 						key[i] = NULL;
 					}
 				}
