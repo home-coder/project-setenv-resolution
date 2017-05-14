@@ -19,6 +19,11 @@ resolution hdmifbres[] = {
 	{"1024x768",  "hdmi,1024x768M@60,bpp=32"},
 };
 
+typedef struct _chosen_res {
+	resolution *fbdevres;
+	int size;
+}chosen_res;
+
 static const char *short_options = "d:r:h";
 
 static const struct option long_options[] = {
@@ -32,8 +37,38 @@ static void print_usage()
 {
 	fprintf(stdout, "Usage:\n");
 	fprintf(stdout, "example 1, ./a.out --fbdev lcd --fbres 1920x1080\n");
-	fprintf(stdout, "example 2, ./a.out -f lcd -r 1920x1080\n");
+	fprintf(stdout, "example 2, ./a.out -d lcd -r 1920x1080\n");
 
+}
+
+static int set_res(const char *fbres, chosen_res *chres, char **resval)
+{
+	int i;
+	for (i = 0; i < chres->size; i++) {
+		if (!strcmp(fbres, chres->fbdevres[i].mode)) {
+			*resval = chres->fbdevres[i].res;
+			return 0;
+		}
+		return -1;
+	}
+
+}
+
+static int fbdev_setres(const char *fbdev, const char *fbres, char **resval)
+{
+	chosen_res *chres;
+
+	if (!strcmp(fbdev, "lcd")) {
+		chres->fbdevres = lcdfbres;
+		chres->size = sizeof(lcdfbres)/sizeof(lcdfbres[0]);
+	} else if (!strcmp(fbdev, "hdmi")) {
+		chres->fbdevres = hdmifbres;
+		chres->size = sizeof(hdmifbres)/sizeof(hdmifbres[0]);
+	} else {
+		return -1;
+	}
+
+	return set_res(fbres, chres, resval);
 }
 
 int main(int argc, char **argv)
@@ -55,7 +90,20 @@ int main(int argc, char **argv)
 					  return -1;
 		}
 	}
-	printf("fbdev:%s, resolution:%s\n", fbdev, fbres);
+	if (fbdev == NULL || fbres == NULL) {
+		fprintf(stderr, "fbdev or resolution is null, please do ./a.out --help\n");
+		exit(-1);
+	} else {
+		printf("fbdev:%s, resolution:%s\n", fbdev, fbres);
+	}
+
+	char *resval;
+	int ret = 0;
+	ret = fbdev_setres(fbdev, fbres, &resval);
+	if (ret < 0) {
+		fprintf(stderr, "fbdev_setres failed\n");
+	}
+	printf("%s\n", resval);
 
 	return 0;
 }
