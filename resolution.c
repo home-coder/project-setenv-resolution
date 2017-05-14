@@ -84,6 +84,7 @@ static void set_res_bootenv(char *fbdev, char *resval)
 	char *key[VAL_MAX];
 	char *mid, *end;
 	int i;
+	char *keyval2_first, *keyval2_second;
 
 	if (!(fp = fopen(BOOTINI, "r+"))) {
 		fprintf(stderr, "open boot env error\n");
@@ -91,7 +92,7 @@ static void set_res_bootenv(char *fbdev, char *resval)
 	}
 
 	for (i = 0; i < VAL_MAX; i++) {
-		key[i] = malloc(sizeof(char) * 128);
+		key[i] = malloc(sizeof(char) * 128);//remeber 使用玩以后要 free掉.
 	}
 
 	while (fgets(linebuf, LINE_SIZE, fp)) {
@@ -105,6 +106,21 @@ static void set_res_bootenv(char *fbdev, char *resval)
 				mid[0] = '\0';
 				key[VAL1] = linebuf;
 				printf("%s%s%s\n", key[VAL1], key[VAL2], key[VAL3]);
+				if ( (keyval2_second = strstr(key[VAL2], fbdev)) != NULL ) {
+					keyval2_second[0] = '\0';
+					keyval2_first = key[VAL2];
+					keyval2_second = resval;
+					//keyval2 = malloc( sizeof(char) * (strlen(keyval2_first)+strlen(keyval2_second)+1) );
+					//if (!keyval2) {
+					//	fprintf(stderr, "malloc memory error\n");
+					//	//TODO free buffer .
+					//	exit(-1);
+					//}
+
+					strcat(keyval2_first, keyval2_second);
+					sprintf(linebuf, "%s%s%s", key[VAL1], keyval2_first, key[VAL3]);
+					fprintf(fp, "%s", linebuf);
+				}
 			}else {
 				break;
 			}
