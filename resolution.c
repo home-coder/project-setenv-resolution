@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define BUFSIZE    16
 
@@ -56,7 +57,7 @@ static int set_res(const char *fbres, chosen_res *chres, char **resval)
 
 static int fbdev_setres(const char *fbdev, const char *fbres, char **resval)
 {
-	chosen_res *chres;
+	chosen_res *chres = (chosen_res *)malloc(sizeof(chosen_res));
 
 	if (!strcmp(fbdev, "lcd")) {
 		chres->fbdevres = lcdfbres;
