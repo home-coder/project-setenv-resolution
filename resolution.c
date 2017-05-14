@@ -126,6 +126,12 @@ static void set_res_bootenv(char *fbdev, char *resval)
 						exit(-1);
 					}
 					fprintf(fp, "%s", linebuf);
+					fclose(fp);
+
+					for (i = 0; i < VAL_MAX; i++) {
+						free(key[i]);
+						key[i] = NULL;
+					}
 				}
 			}else {
 				break;
