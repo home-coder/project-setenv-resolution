@@ -50,9 +50,9 @@ static int set_res(const char *fbres, chosen_res *chres, char **resval)
 			*resval = chres->fbdevres[i].res;
 			return 0;
 		}
-		return -1;
 	}
 
+	return -1;
 }
 
 static int fbdev_setres(const char *fbdev, const char *fbres, char **resval)
