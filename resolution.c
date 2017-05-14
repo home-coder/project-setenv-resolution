@@ -4,6 +4,10 @@
 #include <string.h>
 
 #define BUFSIZE    16
+#define BOOTINI    "./boot.ini"
+#define LINE_SIZE  512
+
+enum para{VAL1 = 0, VAL2, VAL3, VAL_MAX};
 
 typedef struct _resolution {
 	char mode[BUFSIZE];
@@ -62,6 +66,7 @@ static int fbdev_setres(const char *fbdev, const char *fbres, char **resval)
 	if (!strcmp(fbdev, "lcd")) {
 		chres->fbdevres = lcdfbres;
 		chres->size = sizeof(lcdfbres)/sizeof(lcdfbres[0]);
+
 	} else if (!strcmp(fbdev, "hdmi")) {
 		chres->fbdevres = hdmifbres;
 		chres->size = sizeof(hdmifbres)/sizeof(hdmifbres[0]);
@@ -70,6 +75,41 @@ static int fbdev_setres(const char *fbdev, const char *fbres, char **resval)
 	}
 
 	return set_res(fbres, chres, resval);
+}
+
+static void set_res_bootenv(char *fbdev, char *resval)
+{
+	FILE *fp;
+	char linebuf[LINE_SIZE];
+	char *key[VAL_MAX];
+	char *mid, *end;
+	int i;
+
+	if (!(fp = fopen(BOOTINI, "r+"))) {
+		fprintf(stderr, "open boot env error\n");
+		exit(-1);
+	}
+
+	for (i = 0; i < VAL_MAX; i++) {
+		key[i] = malloc(sizeof(char) * 128);
+	}
+
+	while (fgets(linebuf, LINE_SIZE, fp)) {
+		if (!strncmp(linebuf, "bootargs", 8)) {
+			if ((mid = strstr(linebuf, fbdev)) != NULL) {
+				if ((end = strstr(mid, " ")) != NULL) {
+					memcpy(key[VAL3], end, strlen(end) + 1);
+					end[1] = '\0';
+				}
+				memcpy(key[VAL2], mid, strlen(mid));
+				mid[0] = '\0';
+				key[VAL1] = linebuf;
+				printf("%s%s%s\n", key[VAL1], key[VAL2], key[VAL3]);
+			}else {
+				break;
+			}
+		}
+	}
 }
 
 int main(int argc, char **argv)
@@ -105,6 +145,10 @@ int main(int argc, char **argv)
 		fprintf(stderr, "fbdev_setres failed\n");
 	}
 	printf("%s\n", resval);
+
+	/* now, set resval to boot.ini  */
+	set_res_bootenv(fbdev, resval);
+	printf("over\n");
 
 	return 0;
 }
