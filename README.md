@@ -20,3 +20,9 @@ http://www.jb51.net/article/39040.htm
 
 2. 关于内存的申请与释放， 需要把握好哪些方面呢，防止下次重复的犯错误。
 
+
+####buglist######
+oh no, 执行
+./a.out -d lcd -r 1024x768
+行尾居然出现fbmem=28M,28MM
+多了一个大写的 M 
