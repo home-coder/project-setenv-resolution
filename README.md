@@ -26,3 +26,5 @@ oh no, 执行
 ./a.out -d lcd -r 1024x768
 行尾居然出现fbmem=28M,28MM
 多了一个大写的 M 
+
+这个bug， 要仔细分析。不是一个小bug。
